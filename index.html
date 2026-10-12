@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رصد  - التفسير والتلاوة </title>
+<style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background: #f0f5fb; margin: 10px; color: #1e3c5c; }
+
+    .container {
+        max-width: 100%; margin: 0 auto; background: #fff;
+        border-radius: 20px; padding: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+
+    .class-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+    .class-tab {
+        padding: 10px 35px; border-radius: 30px; border: 2px solid #4a7fb5;
+        background: #fff; color: #4a7fb5; font-weight: 700; font-size: 1rem;
+        cursor: pointer; transition: 0.2s;
+    }
+    .class-tab.active { background: #4a7fb5; color: white; }
+
+    .header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #e0ecf8, #c8ddf0);
+        border-radius: 18px; margin-bottom: 15px;
+        border: 2px solid #7faad4;
+    }
+    .header h1 {
+        margin: 0; color: #1a4a7a; font-size: 1.9rem; letter-spacing: 1px;
+        font-family: 'Amiri', 'Traditional Arabic', serif;
+    }
+
+    .main-table {
+        width: 100%; border-collapse: separate; border-spacing: 2px;
+        table-layout: fixed;
+    }
+    .main-table th, .main-table td {
+        text-align: center; vertical-align: middle;
+        padding: 4px 2px; font-size: 0.78rem;
+    }
+
+    .section-header {
+        padding: 8px 5px; border-radius: 10px;
+        font-weight: 800; font-size: 0.95rem; color: white;
+        letter-spacing: 1px;
+    }
+    .section-tafsir { background: linear-gradient(135deg, #8a5fa8, #6b4590); }
+    .section-tilawa { background: linear-gradient(135deg, #4a9d9c, #2d7a7a); }
+    .section-exam   { background: linear-gradient(135deg, #d4854a, #b56a2d); }
+    .section-final  { background: linear-gradient(135deg, #4a7fb5, #2d5a8a); }
+
+    .sub-header-row th {
+        padding: 6px 2px; font-size: 0.72rem; font-weight: 700;
+        color: #1a4a7a; background: #e8f0f8; border-radius: 6px;
+        border: 1px solid #c0d8ec;
+    }
+    .sub-header-row th.col-notes { background: #f5ede0; color: #7a5a1a; }
+    .sub-header-row th.col-tafsir { background: #ede0f5; color: #5a2a7a; }
+    .sub-header-row th.col-tilawa { background: #e0f0f0; color: #1a5a5a; }
+    .sub-header-row th.col-exam { background: #f5e8e0; color: #7a4a1a; }
+    .sub-header-row th.col-final { background: #d8e8f8; color: #0b3b6e; font-weight: 800; }
+    .sub-header-row th.col-avg { background: #e8f4ff; color: #0a3a6e; }
+
+    .student-name-cell {
+        background: #e8f0f8; border: 2px solid #7faad4;
+        border-radius: 10px; padding: 5px;
+        width: 120px;
+    }
+    .student-name-input {
+        width: 100%; border: 1px solid #7faad4; border-radius: 15px;
+        padding: 4px 6px; text-align: center; font-weight: 600;
+        color: #1a4a7a; background: #fff; font-size: 0.8rem;
+    }
+    .student-number {
+        display: inline-block; background: #4a7fb5; color: white;
+        width: 20px; height: 20px; border-radius: 50%; line-height: 20px;
+        font-weight: 700; margin-bottom: 2px; font-size: 0.7rem;
+    }
+
+    .score-select {
+        width: 48px;
+        padding: 4px 2px;
+        border: 1.5px solid #b0c8e0;
+        border-radius: 8px;
+        background: #fff;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #1a4a7a;
+        text-align: center;
+        cursor: pointer;
+        outline: none;
+        transition: 0.15s;
+    }
+    .score-select:hover { border-color: #4a7fb5; }
+    .score-select:focus { border-color: #4a7fb5; box-shadow: 0 0 0 2px rgba(74,127,181,0.2); }
+
+    .notes-input {
+        width: 100%;
+        padding: 5px 6px;
+        border: 1.5px solid #d0c0a0;
+        border-radius: 8px;
+        background: #faf5ec;
+        font-size: 0.78rem;
+        color: #5a4a2a;
+        text-align: right;
+        font-family: inherit;
+        outline: none;
+        resize: none;
+    }
+    .notes-input:focus { border-color: #b0a080; background: #fff; }
+
+    .auto-cell {
+        background: #fff5e0; color: #8a4a1a; font-weight: 800;
+        font-size: 0.95rem; border-radius: 8px;
+        border: 2px solid #e0b070;
+        padding: 6px 3px;
+    }
+    .auto-cell.avg-cell {
+        background: #e8f4ff; color: #0a3a6e;
+        border-color: #6ba3d8;
+    }
+    .auto-cell.exam-avg {
+        background: #fff0e0;
+        color: #8a3a00;
+        border-color: #d4854a;
+    }
+    .auto-cell.final-100 {
+        background: linear-gradient(135deg, #d4e8dd, #a8c8b8);
+        color: #0a4a2a;
+        border-color: #4f8860;
+        font-size: 1.15rem;
+        font-weight: 900;
+    }
+
+    .footer-row td {
+        background: #e8e8f5;
+        font-weight: 800;
+        color: #1a1a5a;
+        font-size: 0.85rem;
+        border: 1px solid #b0b0d8;
+        border-radius: 6px;
+    }
+
+    .status-bar {
+        background: #e8f0f8; border-radius: 12px; padding: 10px 18px;
+        margin-bottom: 12px; display: flex; justify-content: space-around;
+        flex-wrap: wrap; gap: 8px; align-items: center;
+        border: 1px solid #7faad4;
+    }
+    .status-item { font-weight: 600; color: #1a4a7a; font-size: 0.85rem; }
+    .status-value {
+        background: white; padding: 4px 12px; border-radius: 15px;
+        color: #4a7fb5; font-weight: 800; margin-right: 4px;
+    }
+
+    .btn {
+        padding: 10px 20px; border-radius: 25px; border: none;
+        font-weight: 700; font-size: 0.9rem; cursor: pointer;
+        margin: 4px; transition: 0.2s;
+    }
+    .btn-primary { background: #4a7fb5; color: white; }
+    .btn-primary:hover { background: #2d5a8a; }
+    .btn-danger { background: #d05050; color: white; }
+    .btn-danger:hover { background: #a03030; }
+    .btn-success { background: #4f8860; color: white; }
+    .btn-success:hover { background: #2d6840; }
+    .btn-backup { background: #8a5fa8; color: white; }
+    .btn-backup:hover { background: #6b4590; }
+    .btn-restore { background: #d4854a; color: white; }
+    .btn-restore:hover { background: #b56a2d; }
+    .btn-excel { background: #2d7a5a; color: white; }
+    .btn-excel:hover { background: #1a5a3a; }
+
+    .actions-bar {
+        display: flex; justify-content: center; flex-wrap: wrap;
+        margin-top: 15px; gap: 6px;
+        padding: 12px; background: #f5f8fc;
+        border-radius: 15px; border: 1px dashed #b0c8e0;
+    }
+
+    .notes-legend {
+        display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
+        margin-bottom: 10px; padding: 8px; background: #f5f8fc;
+        border-radius: 12px; border: 1px dashed #b0c8e0;
+        font-size: 0.82rem; color: #1a4a7a;
+    }
+    .notes-legend strong { color: #4a7fb5; }
+
+    .empty-class {
+        text-align: center; padding: 50px 20px; color: #6a8aa8;
+        font-size: 1.1rem; background: #f5f8fc; border-radius: 15px;
+    }
+
+    #saveIndicator {
+        position: fixed; bottom: 20px; left: 20px;
+        background: #4f8860; color: white;
+        padding: 10px 20px; border-radius: 30px;
+        font-weight: 700; font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 9999; opacity: 0; transition: opacity 0.3s;
+        direction: rtl;
+    }
+
+    #toastMsg {
+        position: fixed; bottom: 20px; right: 20px;
+        padding: 12px 24px; border-radius: 30px;
+        font-weight: 700; font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 9999; opacity: 0; transition: opacity 0.3s;
+        direction: rtl; color: white;
+    }
+    #toastMsg.success { background: #4f8860; }
+    #toastMsg.error { background: #d05050; }
+    #toastMsg.info { background: #4a7fb5; }
+
+    .footer-note {
+        text-align: center; color: #6a8aa8; margin-top: 15px;
+        font-size: 0.82rem; padding: 8px;
+    }
+
+    .divider-col { background: transparent; width: 5px; padding: 0; }
+
+    @media print {
+        body { background: white; margin: 0; }
+        .class-tabs, .actions-bar, .notes-legend, #saveIndicator, #toastMsg { display: none !important; }
+        .container { box-shadow: none; padding: 0; }
+        .main-table { font-size: 0.7rem; }
+        .score-select { border: none; background: transparent; -webkit-appearance: none; appearance: none; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div class="class-tabs">
+        <button class="class-tab active" data-class="A">فصل أ</button>
+        <button class="class-tab" data-class="B">فصل ب</button>
+    </div>
+
+    <div class="header">
+        <div style="font-size:2rem;">📖</div>
+        <h1>دفتر متابعة التفسير والتلاوة</h1>
+        <div style="font-size:2rem;">🌸</div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">الفصل: <span class="status-value" id="statusClass">أ</span></div>
+        <div class="status-item">عدد الطالبات: <span class="status-value" id="statusCount">0</span></div>
+        <div class="status-item">مجموع الفصل: <span class="status-value" id="statusTotal">0</span></div>
+        <div class="status-item">معدل الفصل: <span class="status-value" id="statusAvg">0.0</span> / 100</div>
+    </div>
+
+    <div class="notes-legend">
+        <div>📖 التفسير: <strong>40</strong> (معدل السور + مشروع + مشاركة + تفاعل)</div>
+        <div>🎤 التلاوة: <strong>40</strong></div>
+        <div>📝 التحريري: <strong>40</strong></div>
+        <div>🏆 المجموع النهائي: <strong>100</strong></div>
+    </div>
+
+    <div id="tableWrapper"></div>
+
+    <div class="actions-bar">
+        <button class="btn btn-success" id="addStudentBtn">➕ إضافة طالبة</button>
+        <button class="btn btn-backup" id="backupBtn">💾 تنزيل نسخة احتياطية</button>
+        <button class="btn btn-restore" id="restoreBtn">📤 استرجاع نسخة</button>
+        <button class="btn btn-excel" id="excelBtn">📊 تصدير Excel</button>
+        <button class="btn btn-primary" id="exportBtn">🖨️ طباعة / PDF</button>
+        <button class="btn btn-danger" id="resetBtn">🔄 إعادة تعيين الفصل</button>
+        <input type="file" id="restoreFile" accept=".json" style="display:none;" />
+    </div>
+
+    <div class="footer-note">
+        ✨ جميع الدرجات تبدأ بـ 10 تلقائياً | تعدّلين فقط من تريدين | 💾 الحفظ تلقائي
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   1. الإعدادات
+   ============================================================ */
+
+const TAFSIR_SURAHS = ['سورة يونس', 'سورة هود', 'سورة يوسف', 'سورة الرعد'];
+
+const TILAWA_FIELDS = [
+    { key: 'sahha',  label: 'صحة التلاوة' },
+    { key: 'tajweed', label: 'التجويد' },
+    { key: 'tarteel', label: 'الترتيل' },
+    { key: 'hifz',   label: 'الحفظ' }
+];
+
+const EXAM_FIELDS = [
+    { key: 'juz1', label: 'جزء 1', max: 20 },
+    { key: 'juz2', label: 'جزء 2', max: 20 }
+];
+
+const DEFAULT_SURAH_SCORE = 10;
+const DEFAULT_PROJECT = 10;
+const DEFAULT_PARTICIPATION = 10;
+const DEFAULT_INTERACTION = 10;
+const DEFAULT_TILAWA = 10;
+const DEFAULT_EXAM_JUZ = 20;
+
+/* ✅ فصل أ - 30 طالبة */
+const CLASS_A_STUDENTS = [
+    'ألماس فهد', 'اسماء عطية', 'اسيل علي', 'اية عتمان', 'بيسال علي',
+    'تالين جمعان', 'جنا حامد', 'جنى جمعان', 'دانه صالح', 'دانه عطيه',
+    'ديان نائف', 'رانيا صالح', 'رسيل احمد', 'رغد علي', 'روان احمد',
+    'رولا ربيع', 'ريتال علي', 'ريما فهد', 'ريما محمد', 'ريماس محمد',
+    'سهى عطيه', 'شهد علي', 'علوه محمد', 'لمى سعيد', 'ليان علي',
+    'ميار محمد', 'نوف عطيه', 'وريف سعيد', 'وريف محمد', 'وعد عطية'
+];
+
+/* ✅ فصل ب - 29 طالبة */
+const CLASS_B_STUDENTS = [
+    'أبرار محمد', 'أثير صالح', 'أسيل سفر', 'أسيل عبدالمجيد', 'أسيل فهد',
+    'أميره سعد', 'بيان محمد', 'جنى سعيد', 'جنى مساعد', 'جود عبدالعزيز',
+    'دلال سعيد', 'دينا سعيد', 'رزان صالح', 'رغد محمد', 'ريتال خالد',
+    'ريلام ياسر', 'ريوف جمعان', 'ساره محمد', 'ساميه سعيد', 'شوق محمد',
+    'صبا خالد', 'عهد سعيد', 'لانا عبدالله', 'لدن سعود', 'لمار علي',
+    'ملاذ خميس', 'ميس ماجد', 'ود محمد', 'وديان محمد'
+];
+
+const INITIAL_STUDENTS = { A: CLASS_A_STUDENTS, B: CLASS_B_STUDENTS };
+
+/* ============================================================
+   2. البيانات والحفظ
+   ============================================================ */
+
+const STORAGE_KEY = 'quranNotebookV6';
+let currentClass = 'A';
+let appData = loadData();
+
+function loadData() {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.A && parsed.B && parsed.A[0] && parsed.A[0].tafsir) {
+                return parsed;
+            }
+        }
+    } catch(e) { console.warn('خطأ في التحميل'); }
+    return generateInitialData();
+}
+
+function generateInitialData() {
+    const data = { A: [], B: [] };
+    ['A','B'].forEach(cls => {
+        data[cls] = INITIAL_STUDENTS[cls].map((name, i) => createStudent(name, i));
+    });
+    return data;
+}
+
+function createStudent(name, index) {
+    return {
+        id: 'stu_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        name: name || ('طالبة ' + (index + 1)),
+        tafsir: {
+            surahs: [DEFAULT_SURAH_SCORE, DEFAULT_SURAH_SCORE, DEFAULT_SURAH_SCORE, DEFAULT_SURAH_SCORE],
+            notes: '',
+            project: DEFAULT_PROJECT,
+            participation: DEFAULT_PARTICIPATION,
+            interaction: DEFAULT_INTERACTION
+        },
+        tilawa: {
+            sahha: DEFAULT_TILAWA,
+            tajweed: DEFAULT_TILAWA,
+            tarteel: DEFAULT_TILAWA,
+            hifz: DEFAULT_TILAWA
+        },
+        exam: {
+            juz1: DEFAULT_EXAM_JUZ,
+            juz2: DEFAULT_EXAM_JUZ
+        }
+    };
+}
+
+let saveTimeout = null;
+function saveData() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        showSaveIndicator();
+    } catch(e) {
+        console.warn('فشل الحفظ');
+        showToast('تعذّر حفظ البيانات', 'error');
+    }
+}
+
+function showSaveIndicator() {
+    const old = document.getElementById('saveIndicator');
+    if (old) old.remove();
+    const ind = document.createElement('div');
+    ind.id = 'saveIndicator';
+    ind.textContent = '✅ تم الحفظ';
+    document.body.appendChild(ind);
+    requestAnimationFrame(() => { ind.style.opacity = '1'; });
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        ind.style.opacity = '0';
+        setTimeout(() => ind.remove(), 300);
+    }, 1000);
+}
+
+function showToast(msg, type = 'info') {
+    const old = document.getElementById('toastMsg');
+    if (old) old.remove();
+    const el = document.createElement('div');
+    el.id = 'toastMsg';
+    el.className = type;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => { el.style.opacity = '1'; });
+    setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+    }, 2200);
+}
+
+/* ============================================================
+   3. الحسابات
+   ============================================================ */
+
+function getSurahAverage(student) {
+    const sum = student.tafsir.surahs.reduce((a, b) => a + (Number(b) || 0), 0);
+    return sum / TAFSIR_SURAHS.length;
+}
+
+function getTafsirTotal(student) {
+    const surahAvg = getSurahAverage(student);
+    const project = Number(student.tafsir.project) || 0;
+    const participation = Number(student.tafsir.participation) || 0;
+    const interaction = Number(student.tafsir.interaction) || 0;
+    return surahAvg + project + participation + interaction;
+}
+
+/* ✅ معدل السور فقط (بدون مشروع/مشاركة/تفاعل) */
+function getTafsirAverage(student) {
+    return getSurahAverage(student).toFixed(1);
+}
+
+function getTilawaTotal(student) {
+    return TILAWA_FIELDS.reduce((sum, f) => sum + (Number(student.tilawa[f.key]) || 0), 0);
+}
+
+function getExamTotal(student) {
+    return (Number(student.exam.juz1) || 0) + (Number(student.exam.juz2) || 0);
+}
+
+function getExamAverage(student) {
+    return (getExamTotal(student) / EXAM_FIELDS.length).toFixed(1);
+}
+
+function getFinalTotal(student) {
+    const tafsir = getTafsirTotal(student);
+    const tilawa = getTilawaTotal(student);
+    const examAvg = getExamTotal(student) / 2;
+    return tafsir + tilawa + examAvg;
+}
+
+function getClassFinalTotal(cls) {
+    return appData[cls].reduce((sum, s) => sum + getFinalTotal(s), 0);
+}
+
+function getClassFinalAverage(cls) {
+    const students = appData[cls];
+    if (!students.length) return '0.0';
+    return (getClassFinalTotal(cls) / students.length).toFixed(1);
+}
+
+/* ============================================================
+   4. الرسم
+   ============================================================ */
+
+function render() {
+    const students = appData[currentClass];
+
+    if (students.length === 0) {
+        document.getElementById('tableWrapper').innerHTML = `
+            <div class="empty-class">
+                لا توجد طالبات في هذا الفصل بعد 🌸<br>
+                اضغطي "إضافة طالبة" للبدء
+            </div>
+        `;
+        renderStatus();
+        return;
+    }
+
+    document.getElementById('tableWrapper').innerHTML = `
+        <table class="main-table" id="mainTable">
+            <thead>
+                <tr class="top-header-row" id="topHeaderRow"></tr>
+                <tr class="sub-header-row" id="subHeaderRow"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    `;
+
+    renderTopHeader();
+    renderSubHeader();
+    renderBody();
+    renderStatus();
+}
+
+function renderTopHeader() {
+    const row = document.getElementById('topHeaderRow');
+    row.innerHTML = '';
+
+    const thName = document.createElement('th');
+    thName.rowSpan = 2;
+    thName.style.cssText = `background: #e8f0f8; border-radius: 10px; padding: 8px; color: #1a4a7a; width: 120px;`;
+    thName.textContent = 'اسم الطالبة';
+    row.appendChild(thName);
+
+    const thTafsir = document.createElement('th');
+    thTafsir.className = 'section-header section-tafsir';
+    thTafsir.colSpan = 10;
+    thTafsir.innerHTML = '📖 قسم التفسير';
+    row.appendChild(thTafsir);
+
+    const thDiv1 = document.createElement('th');
+    thDiv1.className = 'divider-col';
+    thDiv1.rowSpan = 2;
+    row.appendChild(thDiv1);
+
+    const thTilawa = document.createElement('th');
+    thTilawa.className = 'section-header section-tilawa';
+    thTilawa.colSpan = 5;
+    thTilawa.innerHTML = '🎤 قسم التلاوة';
+    row.appendChild(thTilawa);
+
+    const thDiv2 = document.createElement('th');
+    thDiv2.className = 'divider-col';
+    thDiv2.rowSpan = 2;
+    row.appendChild(thDiv2);
+
+    const thExam = document.createElement('th');
+    thExam.className = 'section-header section-exam';
+    thExam.colSpan = 3;
+    thExam.innerHTML = '📝 الاختبار التحريري';
+    row.appendChild(thExam);
+
+    const thDiv3 = document.createElement('th');
+    thDiv3.className = 'divider-col';
+    thDiv3.rowSpan = 2;
+    row.appendChild(thDiv3);
+
+    const thFinal = document.createElement('th');
+    thFinal.className = 'section-header section-final';
+    thFinal.colSpan = 1;
+    thFinal.innerHTML = '🏆 النتيجة النهائية';
+    row.appendChild(thFinal);
+}
+
+function renderSubHeader() {
+    const row = document.getElementById('subHeaderRow');
+    row.innerHTML = '';
+
+    TAFSIR_SURAHS.forEach(s => {
+        const th = document.createElement('th');
+        th.className = 'col-tafsir';
+        th.style.width = '55px';
+        th.innerHTML = s.replace('سورة ', '');
+        row.appendChild(th);
+    });
+
+    /* ✅ معدل السور الأربع فقط */
+    const thTavg = document.createElement('th');
+    thTavg.className = 'col-avg';
+    thTavg.style.width = '55px';
+    thTavg.innerHTML = 'معدل<br>السور<br><span style="font-size:0.65rem;">(من 10)</span>';
+    row.appendChild(thTavg);
+
+    const thNotes = document.createElement('th');
+    thNotes.className = 'col-notes';
+    thNotes.style.width = '120px';
+    thNotes.innerHTML = '📝 ملاحظات';
+    row.appendChild(thNotes);
+
+    const thProj = document.createElement('th');
+    thProj.className = 'col-tafsir';
+    thProj.style.width = '50px';
+    thProj.innerHTML = 'مشروع<br>رقمي';
+    row.appendChild(thProj);
+
+    const thPart = document.createElement('th');
+    thPart.className = 'col-tafsir';
+    thPart.style.width = '45px';
+    thPart.innerHTML = 'مشاركة';
+    row.appendChild(thPart);
+
+    const thInter = document.createElement('th');
+    thInter.className = 'col-tafsir';
+    thInter.style.width = '45px';
+    thInter.innerHTML = 'تفاعل';
+    row.appendChild(thInter);
+
+    const thTsum = document.createElement('th');
+    thTsum.className = 'col-final';
+    thTsum.style.width = '55px';
+    thTsum.innerHTML = 'المجموع<br><span style="font-size:0.65rem;">(من 40)</span>';
+    row.appendChild(thTsum);
+
+    TILAWA_FIELDS.forEach(f => {
+        const th = document.createElement('th');
+        th.className = 'col-tilawa';
+        th.style.width = '55px';
+        th.innerHTML = f.label;
+        row.appendChild(th);
+    });
+
+    const thLsum = document.createElement('th');
+    thLsum.className = 'col-final';
+    thLsum.style.width = '55px';
+    thLsum.innerHTML = 'المجموع<br><span style="font-size:0.65rem;">(من 40)</span>';
+    row.appendChild(thLsum);
+
+    EXAM_FIELDS.forEach(f => {
+        const th = document.createElement('th');
+        th.className = 'col-exam';
+        th.style.width = '55px';
+        th.innerHTML = `${f.label}<br><span style="font-size:0.65rem;">(من ${f.max})</span>`;
+        row.appendChild(th);
+    });
+
+    const thEavg = document.createElement('th');
+    thEavg.className = 'col-exam';
+    thEavg.style.width = '60px';
+    thEavg.innerHTML = 'المعدل<br><span style="font-size:0.65rem;">(من 20)</span>';
+    row.appendChild(thEavg);
+
+    const thFsum = document.createElement('th');
+    thFsum.className = 'col-final';
+    thFsum.style.width = '80px';
+    thFsum.innerHTML = 'المجموع<br><span style="font-size:0.65rem;">(من 100)</span>';
+    row.appendChild(thFsum);
+}
+
+function renderBody() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    const students = appData[currentClass];
+
+    students.forEach((student, sIdx) => {
+        const tr = document.createElement('tr');
+
+        const tdName = document.createElement('td');
+        tdName.className = 'student-name-cell';
+        tdName.innerHTML = `
+            <div class="student-number">${sIdx + 1}</div>
+            <input type="text" class="student-name-input"
+                   value="${escapeHtml(student.name)}"
+                   data-idx="${sIdx}" data-field="name" />
+        `;
+        tr.appendChild(tdName);
+
+        TAFSIR_SURAHS.forEach((_, i) => {
+            const td = document.createElement('td');
+            td.innerHTML = buildSelect(sIdx, 'tafsir-surah', student.tafsir.surahs[i], 10, String(i));
+            tr.appendChild(td);
+        });
+
+        /* ✅ معدل السور فقط */
+        const tdTavg = document.createElement('td');
+        tdTavg.className = 'auto-cell avg-cell';
+        tdTavg.id = `tafsirAvg_${sIdx}`;
+        tdTavg.textContent = getTafsirAverage(student);
+        tr.appendChild(tdTavg);
+
+        const tdNotes = document.createElement('td');
+        tdNotes.innerHTML = `
+            <input type="text" class="notes-input"
+                   value="${escapeHtml(student.tafsir.notes)}"
+                   placeholder="اكتبي..."
+                   data-idx="${sIdx}" data-section="tafsir-notes" />
+        `;
+        tr.appendChild(tdNotes);
+
+        const tdProj = document.createElement('td');
+        tdProj.innerHTML = buildSelect(sIdx, 'tafsir-project', student.tafsir.project, 10);
+        tr.appendChild(tdProj);
+
+        const tdPart = document.createElement('td');
+        tdPart.innerHTML = buildSelect(sIdx, 'tafsir-participation', student.tafsir.participation, 10);
+        tr.appendChild(tdPart);
+
+        const tdInter = document.createElement('td');
+        tdInter.innerHTML = buildSelect(sIdx, 'tafsir-interaction', student.tafsir.interaction, 10);
+        tr.appendChild(tdInter);
+
+        const tdTsum = document.createElement('td');
+        tdTsum.className = 'auto-cell';
+        tdTsum.id = `tafsirTotal_${sIdx}`;
+        tdTsum.textContent = getTafsirTotal(student).toFixed(1);
+        tr.appendChild(tdTsum);
+
+        const tdDiv1 = document.createElement('td');
+        tdDiv1.className = 'divider-col';
+        tr.appendChild(tdDiv1);
+
+        TILAWA_FIELDS.forEach(f => {
+            const td = document.createElement('td');
+            td.innerHTML = buildSelect(sIdx, 'tilawa', student.tilawa[f.key], 10, f.key);
+            tr.appendChild(td);
+        });
+
+        const tdLsum = document.createElement('td');
+        tdLsum.className = 'auto-cell';
+        tdLsum.id = `tilawaTotal_${sIdx}`;
+        tdLsum.textContent = getTilawaTotal(student);
+        tr.appendChild(tdLsum);
+
+        const tdDiv2 = document.createElement('td');
+        tdDiv2.className = 'divider-col';
+        tr.appendChild(tdDiv2);
+
+        EXAM_FIELDS.forEach(f => {
+            const td = document.createElement('td');
+            td.innerHTML = buildSelect(sIdx, 'exam', student.exam[f.key], f.max, f.key);
+            tr.appendChild(td);
+        });
+
+        const tdEavg = document.createElement('td');
+        tdEavg.className = 'auto-cell exam-avg';
+        tdEavg.id = `examAvg_${sIdx}`;
+        tdEavg.textContent = getExamAverage(student);
+        tr.appendChild(tdEavg);
+
+        const tdDiv3 = document.createElement('td');
+        tdDiv3.className = 'divider-col';
+        tr.appendChild(tdDiv3);
+
+        const tdFsum = document.createElement('td');
+        tdFsum.className = 'auto-cell final-100';
+        tdFsum.id = `finalTotal_${sIdx}`;
+        tdFsum.textContent = getFinalTotal(student).toFixed(1);
+        tr.appendChild(tdFsum);
+
+        tbody.appendChild(tr);
+    });
+
+    renderFooterRow(tbody);
+    attachBodyEvents();
+}
+
+function buildSelect(sIdx, section, value, max, key) {
+    value = Number(value) || 0;
+    const dataKey = key !== undefined ? `data-key="${key}"` : '';
+    return `
+        <select class="score-select" data-idx="${sIdx}" data-section="${section}" ${dataKey}>
+            ${Array.from({length: max + 1}, (_, i) => i).map(n => `
+                <option value="${n}" ${value === n ? 'selected' : ''}>${n}</option>
+            `).join('')}
+        </select>
+    `;
+}
+
+function renderFooterRow(tbody) {
+    const tr = document.createElement('tr');
+    tr.className = 'footer-row';
+    const studentsA = appData[currentClass];
+
+    const tdName = document.createElement('td');
+    tdName.textContent = 'إجماليات الفصل';
+    tdName.style.fontWeight = '800';
+    tr.appendChild(tdName);
+
+    TAFSIR_SURAHS.forEach((_, i) => {
+        const td = document.createElement('td');
+        td.textContent = studentsA.reduce((s, stu) => s + (Number(stu.tafsir.surahs[i]) || 0), 0);
+        tr.appendChild(td);
+    });
+
+    /* ✅ معدل السور للفصل (متوسط معدلات السور) */
+    const tdTavg = document.createElement('td');
+    tdTavg.textContent = studentsA.length
+        ? (studentsA.reduce((s, stu) => s + getSurahAverage(stu), 0) / studentsA.length).toFixed(1)
+        : '0.0';
+    tr.appendChild(tdTavg);
+
+    const tdNotes = document.createElement('td');
+    tdNotes.textContent = '—';
+    tr.appendChild(tdNotes);
+
+    const tdProj = document.createElement('td');
+    tdProj.textContent = studentsA.reduce((s, stu) => s + (Number(stu.tafsir.project) || 0), 0);
+    tr.appendChild(tdProj);
+
+    const tdPart = document.createElement('td');
+    tdPart.textContent = studentsA.reduce((s, stu) => s + (Number(stu.tafsir.participation) || 0), 0);
+    tr.appendChild(tdPart);
+
+    const tdInter = document.createElement('td');
+    tdInter.textContent = studentsA.reduce((s, stu) => s + (Number(stu.tafsir.interaction) || 0), 0);
+    tr.appendChild(tdInter);
+
+    const tdTsum = document.createElement('td');
+    tdTsum.textContent = studentsA.reduce((s, stu) => s + getTafsirTotal(stu), 0).toFixed(1);
+    tr.appendChild(tdTsum);
+
+    const tdDiv1 = document.createElement('td');
+    tdDiv1.className = 'divider-col';
+    tr.appendChild(tdDiv1);
+
+    TILAWA_FIELDS.forEach(f => {
+        const td = document.createElement('td');
+        td.textContent = studentsA.reduce((s, stu) => s + (Number(stu.tilawa[f.key]) || 0), 0);
+        tr.appendChild(td);
+    });
+
+    const tdLsum = document.createElement('td');
+    tdLsum.textContent = studentsA.reduce((s, stu) => s + getTilawaTotal(stu), 0);
+    tr.appendChild(tdLsum);
+
+    const tdDiv2 = document.createElement('td');
+    tdDiv2.className = 'divider-col';
+    tr.appendChild(tdDiv2);
+
+    EXAM_FIELDS.forEach(f => {
+        const td = document.createElement('td');
+        td.textContent = studentsA.reduce((s, stu) => s + (Number(stu.exam[f.key]) || 0), 0);
+        tr.appendChild(td);
+    });
+
+    const tdEavg = document.createElement('td');
+    tdEavg.textContent = studentsA.length
+        ? (studentsA.reduce((s, stu) => s + getExamTotal(stu), 0) / (studentsA.length * EXAM_FIELDS.length)).toFixed(1)
+        : '0.0';
+    tr.appendChild(tdEavg);
+
+    const tdDiv3 = document.createElement('td');
+    tdDiv3.className = 'divider-col';
+    tr.appendChild(tdDiv3);
+
+    const tdFsum = document.createElement('td');
+    tdFsum.textContent = getClassFinalTotal(currentClass).toFixed(1);
+    tr.appendChild(tdFsum);
+
+    tbody.appendChild(tr);
+}
+
+function renderStatus() {
+    document.getElementById('statusClass').textContent = currentClass === 'A' ? 'أ' : 'ب';
+    document.getElementById('statusCount').textContent = appData[currentClass].length;
+    document.getElementById('statusTotal').textContent = getClassFinalTotal(currentClass).toFixed(1);
+    document.getElementById('statusAvg').textContent = getClassFinalAverage(currentClass);
+}
+
+function updateStudentCells(studentIdx) {
+    const student = appData[currentClass][studentIdx];
+
+    const ta = document.getElementById(`tafsirAvg_${studentIdx}`);
+    if (ta) ta.textContent = getTafsirAverage(student);
+
+    const ts = document.getElementById(`tafsirTotal_${studentIdx}`);
+    if (ts) ts.textContent = getTafsirTotal(student).toFixed(1);
+
+    const ls = document.getElementById(`tilawaTotal_${studentIdx}`);
+    if (ls) ls.textContent = getTilawaTotal(student);
+
+    const ea = document.getElementById(`examAvg_${studentIdx}`);
+    if (ea) ea.textContent = getExamAverage(student);
+
+    const fs = document.getElementById(`finalTotal_${studentIdx}`);
+    if (fs) fs.textContent = getFinalTotal(student).toFixed(1);
+
+    renderStatus();
+
+    const tbody = document.getElementById('tableBody');
+    if (!tbody) return;
+    const lastRow = tbody.lastElementChild;
+    if (!lastRow) return;
+    lastRow.remove();
+    renderFooterRow(tbody);
+}
+
+function attachBodyEvents() {
+    document.querySelectorAll('.student-name-input').forEach(inp => {
+        inp.addEventListener('input', e => {
+            const idx = parseInt(e.target.dataset.idx);
+            appData[currentClass][idx].name = e.target.value;
+            saveData();
+        });
+    });
+
+    document.querySelectorAll('.notes-input').forEach(inp => {
+        inp.addEventListener('input', e => {
+            const idx = parseInt(e.target.dataset.idx);
+            appData[currentClass][idx].tafsir.notes = e.target.value;
+            saveData();
+        });
+    });
+
+    document.querySelectorAll('.score-select').forEach(sel => {
+        sel.addEventListener('change', e => {
+            const idx = parseInt(e.target.dataset.idx);
+            const section = e.target.dataset.section;
+            const key = e.target.dataset.key;
+            const val = parseInt(e.target.value) || 0;
+
+            if (section === 'tafsir-surah') {
+                appData[currentClass][idx].tafsir.surahs[parseInt(key)] = val;
+            } else if (section === 'tafsir-project') {
+                appData[currentClass][idx].tafsir.project = val;
+            } else if (section === 'tafsir-participation') {
+                appData[currentClass][idx].tafsir.participation = val;
+            } else if (section === 'tafsir-interaction') {
+                appData[currentClass][idx].tafsir.interaction = val;
+            } else if (section === 'tilawa') {
+                appData[currentClass][idx].tilawa[key] = val;
+            } else if (section === 'exam') {
+                appData[currentClass][idx].exam[key] = val;
+            }
+
+            saveData();
+            updateStudentCells(idx);
+        });
+    });
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[m]));
+}
+
+/* ============================================================
+   5. النسخ الاحتياطي
+   ============================================================ */
+
+function downloadBackup() {
+    try {
+        const backup = {
+            version: '6.0',
+            app: 'quranNotebook',
+            date: new Date().toISOString(),
+            data: appData
+        };
+        const json = JSON.stringify(backup, null, 2);
+        const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `نسخة_احتياطية_دفتر_الدرجات_${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('✅ تم تنزيل النسخة الاحتياطية', 'success');
+    } catch(e) {
+        console.error(e);
+        showToast('تعذّر تنزيل النسخة', 'error');
+    }
+}
+
+function restoreBackup(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const parsed = JSON.parse(e.target.result);
+            const data = parsed.data || parsed;
+            if (!data.A || !data.B) throw new Error('ملف غير صالح');
+            if (!confirm('⚠️ سيتم استبدال جميع البيانات الحالية بالنسخة الاحتياطية. هل أنت متأكدة؟')) return;
+            appData = data;
+            saveData();
+            render();
+            showToast('✅ تم استرجاع النسخة بنجاح', 'success');
+        } catch(err) {
+            console.error(err);
+            showToast('❌ الملف تالف أو غير صالح', 'error');
+        }
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+/* ============================================================
+   6. تصدير Excel
+   ============================================================ */
+
+function exportToExcel() {
+    try {
+        const students = appData[currentClass];
+        if (!students.length) {
+            showToast('لا توجد بيانات لتصديرها', 'error');
+            return;
+        }
+
+        const headers = [
+            'م', 'اسم الطالبة',
+            'يونس', 'هود', 'يوسف', 'الرعد',
+            'معدل السور',
+            'ملاحظات',
+            'مشروع رقمي', 'مشاركة', 'تفاعل',
+            'مجموع التفسير',
+            'صحة التلاوة', 'التجويد', 'الترتيل', 'الحفظ', 'مجموع التلاوة',
+            'اختبار جزء 1', 'اختبار جزء 2', 'معدل التحريري',
+            'المجموع النهائي'
+        ];
+
+        const rows = students.map((stu, i) => [
+            i + 1,
+            stu.name,
+            stu.tafsir.surahs[0] || 0,
+            stu.tafsir.surahs[1] || 0,
+            stu.tafsir.surahs[2] || 0,
+            stu.tafsir.surahs[3] || 0,
+            getTafsirAverage(stu),
+            (stu.tafsir.notes || '').replace(/[\r\n]+/g, ' '),
+            stu.tafsir.project || 0,
+            stu.tafsir.participation || 0,
+            stu.tafsir.interaction || 0,
+            getTafsirTotal(stu).toFixed(1),
+            stu.tilawa.sahha || 0,
+            stu.tilawa.tajweed || 0,
+            stu.tilawa.tarteel || 0,
+            stu.tilawa.hifz || 0,
+            getTilawaTotal(stu),
+            stu.exam.juz1 || 0,
+            stu.exam.juz2 || 0,
+            getExamAverage(stu),
+            getFinalTotal(stu).toFixed(1)
+        ]);
+
+        const BOM = '\uFEFF';
+        const csvRows = [
+            headers.map(h => `"${h}"`).join(','),
+            ...rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        ];
+        const csv = BOM + csvRows.join('\r\n');
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const className = currentClass === 'A' ? 'فصل_أ' : 'فصل_ب';
+        a.download = `دفتر_الدرجات_${className}_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('✅ تم تصدير الملف — افتحيه في Excel', 'success');
+    } catch(e) {
+        console.error(e);
+        showToast('تعذّر التصدير', 'error');
+    }
+}
+
+/* ============================================================
+   7. الأحداث العامة
+   ============================================================ */
+
+document.querySelectorAll('.class-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.class-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentClass = tab.dataset.class;
+        render();
+    });
+});
+
+document.getElementById('addStudentBtn').addEventListener('click', () => {
+    appData[currentClass].push(createStudent('طالبة جديدة', appData[currentClass].length));
+    saveData();
+    render();
+});
+
+document.getElementById('backupBtn').addEventListener('click', downloadBackup);
+
+document.getElementById('restoreBtn').addEventListener('click', () => {
+    document.getElementById('restoreFile').click();
+});
+
+document.getElementById('restoreFile').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) {
+        restoreBackup(file);
+        e.target.value = '';
+    }
+});
+
+document.getElementById('excelBtn').addEventListener('click', exportToExcel);
+
+document.getElementById('exportBtn').addEventListener('click', () => window.print());
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+    if (confirm(`⚠️ هل تريدين إعادة تعيين بيانات ${currentClass === 'A' ? 'فصل أ' : 'فصل ب'}؟\n\nسيتم حذف جميع الدرجات وإرجاعها إلى 10!`)) {
+        appData[currentClass] = INITIAL_STUDENTS[currentClass].map((n, i) => createStudent(n, i));
+        saveData();
+        render();
+        showToast('تم إعادة تعيين الفصل (كل الدرجات = 10)', 'info');
+    }
+});
+
+/* ============================================================
+   8. بدء التشغيل
+   ============================================================ */
+
+render();
+</script>
+</body>
+</html>
